@@ -1,5 +1,6 @@
 const baseUrl = 'http://localhost:3001/persons';
 
+
 const getAll = () => {
     const request = fetch(baseUrl,{
         method: 'GET',

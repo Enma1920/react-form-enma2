@@ -1,20 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
+import {personService} from "../services"; 
 
 export const usePersons = () => {
-    const [persons, setPersons] = useState([
-        { name: 'Arto Hellas', number: '040-123456', id: 1 },
-        { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-        { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-        { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-    ]);
+    const [persons, setPersons] = useState([]);
+    
+    useEffect(() =>{
+        personService.getAll().then(data => {
+            handleChangePersonsValue(data);
+        })
+    }, []);
 
     const handleChangePersonsValue = (newValue) => {
-        setPersons(newValue)
-    }
-
-    return {
-        persons,
-        handleChangePersonsValue
+        setPersons(newValue);
     };
-}
+
+    const createPerson = (newPerson)=>{
+        personService.create(newPerson);
+    };
+
+    
+    const handleDeletePerson = (id) => {
+        // const deletePerson = persons.some(person => person.id === id);
+        const response = window.confirm(`¿Quieres eliminar ${id} ?`);
+
+        if(response){
+            personService.deletePerson(id).then(() =>{
+                setPersons(persons.filter(person => person.id !== id));
+                personService.getAll().then(persons =>{
+                    setPersons(persons);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            })
+            
+        }
+    };
+    
+    const handleUpdatePerson = (id, newNumber, name) => {
+        const personExists = persons.some(person => person.id === id);
+        if(personExists){
+            const confirmed = window.confirm(
+                `User ${name} is already in the phone book. Do you want to replace your existing number?`
+                );
+                if (confirmed) {
+                    personService.update(id, { number: newNumber, name: name })
+                    .then(updatedPerson => {
+                        setPersons(persons.map(person => person.id !== id ? person : updatedPerson));
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                }
+        
+
+        }
+    };    
+    return { persons, handleChangePersonsValue, handleDeletePerson, handleUpdatePerson, createPerson};
+};
+
 

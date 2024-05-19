@@ -1,17 +1,26 @@
+import { usePersons } from "../hooks";
 export const PersonForm = ({ newName, setNewName, newNumber, handleNewNumber, persons, setPersons }) => {
+    const {handleUpdatePerson} = usePersons();
+    const {createPerson} = usePersons();
 
     const addNewPerson = (event) => {
 		event.preventDefault();
 		if (!persons.some(person => (person.name === newName))) {
 			const newPerson = {
-				id: Date.now(),
+                id: Date.now(),
 				name: newName,
 				number: newNumber
-			}
-			setPersons([...persons, newPerson])
+
+			};
+            createPerson(newPerson);
+			setPersons([...persons, newPerson]);
+            
+        
+        
 		} else {
-			alert(`${newName} is already added to the phonebook`)
-		}
+            const existingPerson = persons.find(person => person.name === newName);
+            handleUpdatePerson(existingPerson.id, newNumber, existingPerson.name);
+        }
 	};
 
     return (
